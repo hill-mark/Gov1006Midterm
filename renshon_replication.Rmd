@@ -6,5 +6,90 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
+
 knitr::opts_chunk$set(echo = TRUE)
+
+# Replicates and Extension of code from "Physiological Arousal and Political Beliefs"
+# I will be replicating Figures 2, 3 and Table 1.
+
+# Load the required libraries
+
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(mediation)
+
 ```
+
+```{r datasets, include=FALSE}
+
+# Load Required Datasets
+
+anxiety_data <-read.csv("./dataverse_files/anxiety.csv")
+mturk_data <-read.csv("./dataverse_files/mTurk.csv")
+
+```
+
+```{r cleanData, echo=FALSE}
+
+# We will clean up the data to make it more readable
+
+# Start by renaming the variables. This is following the names that
+#   they used in the stata file
+
+clean_data <- anxiety_data %>%  
+  rename("Anxiety Condition" = anxcond3,
+         "Immigration DV" = immigration,
+         "SCD (Mean) While Answering Questions" = SCDBradSelfReport1_mean,
+         "Story Condition" = storycond,
+         "Anxiety Manipulation Dummy" = anxcond,
+        "Ideology" = ideology,
+        "Age" = age,
+        "Race" = race,
+        "Income" = income,
+        "Education" = education) %>% 
+  
+  # Now we will clean up the values within the columns so that they make 
+  #   intuitive sense when read
+
+  # Anxcond3 refers to the three different treatment conditions
+  #   these are: RELAX, NEUTRAL, ANXIETY
+  # In the stata code, table 1 has the clause if anxcond3 ~=0
+  #   it also states that table 1 excludes the "relax" condition
+  #   so we know that 0 is the relax condition
+  # Note that there is one NA value here which I have removed
+  
+  filter(!is.na(anxcond3)) %>% 
+
+  mutate (`Anxiety Condition` = case_when(
+                                `Anxiety Condition` == 0 ~ "Relax",
+                                `Anxiety Condition` == 1 ~ "Relax",
+                                TRUE ~ "Relax"
+                                ))
+
+
+```
+
+
+```{r figure3, echo=FALSE}
+
+## Make Subsets (do this last)
+noRelaxCond <- subset(anxiety_data, anxcond3>0)
+
+#Outcome Model
+y <- lm(immigration ~ anxcond + SCDBradSelfReport1_mean+storycond, data= noRelaxCond)
+summary(y) # summarize results from model
+
+#Mediator Model
+m<- lm(SCDBradSelfReport1_mean ~ anxcond+storycond, data= noRelaxCond)
+summary(m) # summarize results from model
+
+# Mediation Analysis
+m.out<-mediate(m,y, sims=500, treat="anxcond", mediator="SCDBradSelfReport1_mean", dropobs=TRUE, boot=TRUE, conf.level=.90)
+summary(m.out)
+#plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
+
+```
+
+
+
