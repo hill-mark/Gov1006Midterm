@@ -121,7 +121,7 @@ clean_data <- anxiety_data %>%
   mutate(Story_Condition = case_when(
                                 Story_Condition == 0 ~ "Jose",
                                 TRUE ~ "Niko"
-                                )) 
+                                )) %>% 
 
   
   # Analysis of Anxiety_IV
@@ -134,13 +134,24 @@ clean_data <- anxiety_data %>%
   #   so it should be about a third of the total number.
 
 
+  # I reached out to the authors of the paper and they were able to provide copies
+  #   of the questionares for the pretreatment survey:
+
   # Analysis of Ideology Column
 
   # This variable is part of the pretreatment demographic survey. It includes things
   #   like party identification
-  # The minimum is a 1, and the max is a 7 suggesting that a likert scale was possibly
-  #   used? There is one NA
-  # There is no indication as to which levels of ideology indicate specific ideologies
+  # Values taken from pretreatment survey:
+
+  mutate(Ideology = case_when(
+                        Ideology == 1 ~ "Extremely Liberal",
+                        Ideology == 2 ~ "Liberal",
+                        Ideology == 3 ~ "Slightly Liberal",
+                        Ideology == 4 ~ "Moderate",
+                        Ideology == 5 ~ "Slightly Conservative",
+                        Ideology == 6 ~ "Conservative",
+                        Ideology == 7 ~ "Extremely Conservative"
+                        )) %>% 
 
 
   # Analysis of Race Column
@@ -149,11 +160,30 @@ clean_data <- anxiety_data %>%
   # It contains values 1 through 7. There is one NA.
   # It doesn't seem like they give info regarding what the different categories
   #   indicate
+  
+  mutate(Race = case_when(
+                      Race == 1 ~ "Caucasian",
+                      Race == 2 ~ "African American",
+                      Race == 3 ~ "Asian",
+                      Race == 4 ~ "Hispanic",
+                      Race == 5 ~ "Native American",
+                      Race == 6 ~ "Pacific Islander",
+                      Race == 7 ~ "Other"
+                      )) %>% 
 
-  # Income and Education are similiar
-
-  # I have reached out to the authors of the papers regarding these variables
-  #   and the pretreatment survey
+  # Analysis of Income Column
+  
+  # Income is also avaliable on the pretreatment survey
+  
+  mutate(Income = case_when(
+                    Income == 1 ~ "$0-24,999",
+                    Income == 2 ~ "$25,000-49,999",
+                    Income == 3 ~ "$50,000-79,999",
+                    Income == 4 ~ "$80,000-110,000",
+                    Income == 5 ~ "$110,000 -150,000",
+                    Income == 6 ~ "$150,000-200,000",
+                    Income == 7 ~ "$200,000"
+                    )) 
 
 ```
 
