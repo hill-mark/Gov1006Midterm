@@ -7,12 +7,14 @@ output: html_document
 
 ```{r setup, include=FALSE}
 
+# ************************
+# Load Required Libraries
+# ************************
+
 knitr::opts_chunk$set(echo = TRUE)
 
 # Replicates and Extension of code from "Physiological Arousal and Political Beliefs"
 # I will be replicating Figures 2, 3 and Table 1.
-
-# Load the required libraries
 
 library(tidyverse)
 library(dplyr)
@@ -42,14 +44,14 @@ mturk_data <-read.csv("./dataverse_files/mTurk.csv")
 # *****************************************************
 
 # Start by renaming the variables. This is following the names that
-#   they used in the stata file
+#   they used in the stata file with some minor changes
 
 clean_data <- anxiety_data %>%  
   rename("Anxiety Condition" = anxcond3,
          "Immigration DV" = immigration,
          "SCD (Mean) While Answering Questions" = SCDBradSelfReport1_mean,
          "Story Condition" = storycond,
-         "Anxiety Manipulation Dummy" = anxcond,
+         "Anxiety Indicator Variable" = anxcond,
         "Ideology" = ideology,
         "Age" = age,
         "Race" = race,
@@ -122,18 +124,47 @@ clean_data <- anxiety_data %>%
                                 )) 
 
   
-  # Analysis of Anxiety Manipulation Dummy
+  # Analysis of Anxiety Indicator Variable
 
   # This variable is described as an indicator variable for the treatment status
-  # Its values are exculsively 0 and 1, and its mean value is .295
-  # 
-  
+  #   Its values are exculsively 0 and 1, and its mean value is .295
+  # We can see by comparing this to the Anxiety Condition column, that the value
+  #    it 1 when the condition is Anxiety, and 0 otherwise
+  # This makes intuitive sense why the mean value is near .3, as there are 3 conditions
+  #   so it should be about a third of the total number.
 
 
-clean_data
+  # Analysis of Ideology Column
+
+  # This variable is part of the pretreatment demographic survey. It includes things
+  #   like party identification
+  # The minimum is a 1, and the max is a 7 suggesting that a likert scale was possibly
+  #   used? There is one NA
+  # There is no indication as to which levels of ideology indicate specific ideologies
+
+
+  # Analysis of Race Column
+
+  # This variable is part of the pretreatment demographic survey.
+  # It contains values 1 through 7. There is one NA.
+  # It doesn't seem like they give info regarding what the different categories
+  #   indicate
+
+  # Income and Education are similiar
 
 ```
 
+## Figure 2
+
+```{r figure2, echo=FALSE}
+
+
+
+
+```
+
+
+## Figure 3
 
 ```{r figure3, echo=FALSE}
 
@@ -155,5 +186,12 @@ summary(m.out)
 
 ```
 
+## Table 1
+
+```{table1, echo=FALSE}
+
+
+
+```
 
 
