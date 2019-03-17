@@ -312,18 +312,24 @@ p1 +  geom_segment(data = all_intervals,
 # Recreating Figure 3: 
 # **************************************************************
 
-## Make Subsets (do this last)
-noRelaxCond <- subset(anxiety_data, anxcond3>0)
+# I cleaned up their R code for this section to make it more legible
 
-#Outcome Model
-y <- lm(immigration ~ anxcond + SCDBradSelfReport1_mean+storycond, data= noRelaxCond)
+# Filter to remove the relaxed condition
 
-#Mediator Model
-m<- lm(SCDBradSelfReport1_mean ~ anxcond+storycond, data= noRelaxCond)
+data_norelax <- clean_data %>% 
+  
+  filter(Anxiety_Condition != "Relax")
+
+# Outcome Model
+y <- lm(Immigration_DV ~ Anxiety_IV + Conductivity_Mean + Story_Condition, data= data_norelax)
+
+# Mediator Model
+m<- lm(Conductivity_Mean ~ Anxiety_IV + Story_Condition, data= data_norelax)
 
 # Mediation Analysis
-m.out<-mediate(m,y, sims=500, treat="anxcond", mediator="SCDBradSelfReport1_mean", dropobs=TRUE, boot=TRUE, conf.level=.90)
+m.out<-mediate(m,y, sims=500, treat="Anxiety_IV", mediator="Conductivity_Mean", dropobs=TRUE, boot=TRUE, conf.level=.90)
 
+# Plot the Output
 plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
 
 ```
@@ -331,6 +337,48 @@ plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anx
 ## Table 1
 
 ```{table1, echo=FALSE}
+
+# ********************************
+# Recreating Table 1: Main Results
+# ********************************
+
+#* Table 1 in paper
+#* (1)
+#reg SCDBradSelfReport1_mean anxcond if anxcond3 ~=0
+
+#* (2)
+#reg immigration storycond anxcond SCDBradSelfReport1_mean if anxcond3 ~=0
+
+# Linear Regression 1
+
+lm(Anxiety_Condition ~ , data = clean_data)
+
+# Linear Regression 2
+
+
+
+stargazer(ols1, ols2, ols3, ols4, 
+          type="html",
+          dep.var.labels = "Overall Attitude Change",
+          covariate.labels = c("Treatment",
+                               "Waits on Platform",
+                               "White",
+                               "Income",
+                               "Franklin Line",
+                               "Grafton Sta.",
+                               "Natick Sta.",
+                               "Norfolk Sta.",
+                               "Norwood Sta.",
+                               "Southborough Sta.",
+                               "Wellesley Hills Sta.",
+                               "West Natick Sta.",
+                               "Windsor Gardens Sta.",
+                               "Intercept"),
+          star.cutoffs = c(0.05, 0.01, 0.001),
+          notes = "Natick Station omitted due to multicollinearity. All coefficients reported above are OLS coefficients. Positive numbers indicate more conservative responses.",
+          notes.align = "l"
+          )
+
 
 
 
