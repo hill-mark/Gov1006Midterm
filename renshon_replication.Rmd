@@ -23,7 +23,12 @@ library(mediation)
 
 ```{r datasets, include=FALSE}
 
+# **********************
 # Load Required Datasets
+# **********************
+
+# Note that I will use stars to make the "title" of each section of
+#   comments more readable
 
 anxiety_data <-read.csv("./dataverse_files/anxiety.csv")
 mturk_data <-read.csv("./dataverse_files/mTurk.csv")
@@ -32,7 +37,9 @@ mturk_data <-read.csv("./dataverse_files/mTurk.csv")
 
 ```{r cleanData, echo=FALSE}
 
-# We will clean up the data to make it more readable
+# *****************************************************
+# Cleaning and Analyzing the Data to Improve Readiblity
+# *****************************************************
 
 # Start by renaming the variables. This is following the names that
 #   they used in the stata file
@@ -52,21 +59,78 @@ clean_data <- anxiety_data %>%
   # Now we will clean up the values within the columns so that they make 
   #   intuitive sense when read
 
+  
+  
+  # Analysis of "Anxiety Condition"
+  
   # Anxcond3 refers to the three different treatment conditions
-  #   these are: RELAX, NEUTRAL, ANXIETY
+  #   these are: RELAX, NEUTRAL, ANXIETY (labeled 0,1,2)
+  # Note that there is one NA value here which I have removed
+  
+  filter(!is.na(`Anxiety Condition`)) %>% 
+  
   # In the stata code, table 1 has the clause if anxcond3 ~=0
   #   it also states that table 1 excludes the "relax" condition
   #   so we know that 0 is the relax condition
-  # Note that there is one NA value here which I have removed
-  
-  filter(!is.na(anxcond3)) %>% 
+  # In the stata code for appendix H, we can see that model 1 is neutral
+  #   condition and model 2 is anxiety condition. They use the values 1 
+  #   and 2 from the anxcond3 column respectivly to make these, so we 
+  #   also know these values
 
   mutate (`Anxiety Condition` = case_when(
                                 `Anxiety Condition` == 0 ~ "Relax",
-                                `Anxiety Condition` == 1 ~ "Relax",
-                                TRUE ~ "Relax"
-                                ))
+                                `Anxiety Condition` == 1 ~ "Neutral",
+                                TRUE ~ "Anxiety"
+                                )) %>% 
+  
+  
+  # Analysis of "Immigration DV"
+  
+  # The immigration column, labeled immigration DV, presumably means 
+  #   immigration dependant variable as this is measured during the survey
+  #   after the experiment occurs (i.e. this is the outcome)
+  # The min is 1, the max is 5, so we can assume that this refers to 
+  #   the immigration preferences given by the 5 point scale in the survey
+  # These preferences range from "strongly agree" to "strongly disagree"
+  # In the appendix it states that "higher values represent more 
+  #   anti-immigrant attitudes"
+  # This is given as a dbl in the r code, which shows that it is a mix of the 
+  #   answers to the 5 questions regarding immigration from the appendix.
 
+  
+  # Analysis of "SCD (Mean) While Answering Questions"
+
+  # SCD refers to Skin Conductance. We know this because of its use in figure 3
+  #   in the appendix. 
+  # Skin conductance was measured during the immigration questionnaire.
+  # There are 10 NA's here, which could suggest that some people did not want to
+  #   be tested in this manner?
+  # A higher skin conductance indicates more anxiety
+
+
+  # Analysis of Story Condition
+
+  # The participants were primed with an immigration story frame before shown the
+  #   video condition. 
+  # This column only contains values 0 and 1.
+  # It can be assumed by their ordering in the appendix / discussion in the text
+  #   that Jose is condition 0 and Niko is condition 1 (the names of the two conditions)
+
+  mutate(`Story Condition` = case_when(
+                                `Story Condition` == 0 ~ "Jose",
+                                TRUE ~ "Niko"
+                                )) 
+
+  
+  # Analysis of Anxiety Manipulation Dummy
+
+  # This variable is described as an indicator variable for the treatment status
+  # Its values are exculsively 0 and 1, and its mean value is .295
+  # 
+  
+
+
+clean_data
 
 ```
 
