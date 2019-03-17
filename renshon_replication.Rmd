@@ -47,11 +47,11 @@ mturk_data <-read.csv("./dataverse_files/mTurk.csv")
 #   they used in the stata file with some minor changes
 
 clean_data <- anxiety_data %>%  
-  rename("Anxiety Condition" = anxcond3,
-         "Immigration DV" = immigration,
-         "SCD (Mean) While Answering Questions" = SCDBradSelfReport1_mean,
-         "Story Condition" = storycond,
-         "Anxiety Indicator Variable" = anxcond,
+  rename("Anxiety_Condition" = anxcond3,
+         "Immigration_DV" = immigration,
+         "Conductivity_Mean" = SCDBradSelfReport1_mean,
+         "Story_Condition" = storycond,
+         "Anxiety_IV" = anxcond,
         "Ideology" = ideology,
         "Age" = age,
         "Race" = race,
@@ -63,13 +63,13 @@ clean_data <- anxiety_data %>%
 
   
   
-  # Analysis of "Anxiety Condition"
+  # Analysis of "Anxiety_Condition"
   
   # Anxcond3 refers to the three different treatment conditions
   #   these are: RELAX, NEUTRAL, ANXIETY (labeled 0,1,2)
   # Note that there is one NA value here which I have removed
   
-  filter(!is.na(`Anxiety Condition`)) %>% 
+  filter(!is.na(Anxiety_Condition)) %>% 
   
   # In the stata code, table 1 has the clause if anxcond3 ~=0
   #   it also states that table 1 excludes the "relax" condition
@@ -79,14 +79,14 @@ clean_data <- anxiety_data %>%
   #   and 2 from the anxcond3 column respectivly to make these, so we 
   #   also know these values
 
-  mutate (`Anxiety Condition` = case_when(
-                                `Anxiety Condition` == 0 ~ "Relax",
-                                `Anxiety Condition` == 1 ~ "Neutral",
+  mutate (Anxiety_Condition = case_when(
+                                Anxiety_Condition == 0 ~ "Relax",
+                                Anxiety_Condition == 1 ~ "Neutral",
                                 TRUE ~ "Anxiety"
                                 )) %>% 
   
   
-  # Analysis of "Immigration DV"
+  # Analysis of "Immigration_DV"
   
   # The immigration column, labeled immigration DV, presumably means 
   #   immigration dependant variable as this is measured during the survey
@@ -100,7 +100,7 @@ clean_data <- anxiety_data %>%
   #   answers to the 5 questions regarding immigration from the appendix.
 
   
-  # Analysis of "SCD (Mean) While Answering Questions"
+  # Analysis of "Conductivity_Mean"
 
   # SCD refers to Skin Conductance. We know this because of its use in figure 3
   #   in the appendix. 
@@ -110,7 +110,7 @@ clean_data <- anxiety_data %>%
   # A higher skin conductance indicates more anxiety
 
 
-  # Analysis of Story Condition
+  # Analysis of Story_Condition
 
   # The participants were primed with an immigration story frame before shown the
   #   video condition. 
@@ -118,13 +118,13 @@ clean_data <- anxiety_data %>%
   # It can be assumed by their ordering in the appendix / discussion in the text
   #   that Jose is condition 0 and Niko is condition 1 (the names of the two conditions)
 
-  mutate(`Story Condition` = case_when(
-                                `Story Condition` == 0 ~ "Jose",
+  mutate(Story_Condition = case_when(
+                                Story_Condition == 0 ~ "Jose",
                                 TRUE ~ "Niko"
                                 )) 
 
   
-  # Analysis of Anxiety Indicator Variable
+  # Analysis of Anxiety_IV
 
   # This variable is described as an indicator variable for the treatment status
   #   Its values are exculsively 0 and 1, and its mean value is .295
@@ -152,14 +152,154 @@ clean_data <- anxiety_data %>%
 
   # Income and Education are similiar
 
+  # I have reached out to the authors of the papers regarding these variables
+  #   and the pretreatment survey
+
 ```
 
 ## Figure 2
 
 ```{r figure2, echo=FALSE}
 
+# **************************************************************
+# Recreating Figure 2: Skin Conductivity vs. Treatment Condition
+# **************************************************************
+
+# For this graph we need dots showing the mean of the values, and also
+#   lines showing the 95% confidence interval for the values
+
+# First, we will calculate the means of the treatment conditions and 
+#   create the plot with just the points of the means on the graph
+
+p1 <- clean_data %>% 
+  
+  # Filter out all lines where there is no conductivity data
+  
+  filter(!is.na(Conductivity_Mean)) %>% 
+  
+  # Group by the 3 different treatment conditions so that we
+  #   can analyze differences between the treatments
+  
+  group_by(Anxiety_Condition) %>% 
+  
+  # Use the summarize function to gather the mean of the three
+  #   different conditions
+  
+  summarize(mean_value = mean(Conductivity_Mean)) %>% 
+  
+  # Use fct_relevel to edit the ordering of the three columns
+  
+  mutate(Anxiety_Condition = fct_relevel(Anxiety_Condition, c("Relax", "Neutral", "Anxiety"))) %>% 
+  
+  # Use ggplot to output the point data for the graph
+  
+  ggplot(aes(x = Anxiety_Condition, y = mean_value))
+
+# Next we will calculate the 95% confidence intervals
 
 
+# I will create a function that on input a given condition and 
+#   its skin conductivity values outputs the correct conductivity
+#   intervals
+
+conduct_intervals <- function(data, name) {
+
+  # Inspiration for this section was taken from an R tutorial on
+  #   Cyclismo: https://www.cyclismo.org/tutorial/R/confidence.html
+  
+  # Calulcate the nuber of data points
+  
+  relax_n <- data %>% nrow()
+  
+  # Calculate the mean of the data points
+  
+  relax_a <- mean(data$Conductivity_Mean)
+  
+  # Calculate the standard deviation of the data
+  
+  relax_s <- sd(data$Conductivity_Mean)
+  
+  # qt returns the value of the 95th percentile of a distribution, this function
+  #    thus calculates the distance tht the 95th percentile will be from the mean
+  
+  error <- qt(0.95, df = relax_n - 1) * relax_s / sqrt(relax_n)
+  
+  # Uses the error to calculate the left bound and right bound
+  
+  left <- relax_a-error
+  
+  right <- relax_a+error
+  
+  # Create a data frame to store the outcomes
+  
+  test_frame <- setNames(data.frame(matrix(ncol = 3, nrow = 1)), c("condition", "left", "right"))
+  
+  # Append the sd data to the data frame
+  
+  test_frame$condition[1] = name
+  test_frame$left[1] = left
+  test_frame$right[1] = right
+  
+  # Output the data frame with the correct functions in it
+  
+  test_frame
+
+}
+
+# We use a series of filter commands to create the correct inputs
+#   for our function
+# These commands elimnate all NA values, filter for the correct condition,
+#   and input the "name" paramater so that the function can correctly assign
+#   values for ggplot
+
+relax_intervals <- clean_data %>% 
+  filter(Anxiety_Condition == "Relax") %>% 
+  filter(!is.na(Conductivity_Mean)) %>% 
+  conduct_intervals("Relax")
+
+neutral_intervals <- clean_data %>% 
+  filter(Anxiety_Condition == "Neutral") %>% 
+  filter(!is.na(Conductivity_Mean)) %>% 
+  conduct_intervals("Neutral")
+
+anxiety_intervals <- clean_data %>% 
+  filter(Anxiety_Condition == "Anxiety") %>% 
+  filter(!is.na(Conductivity_Mean)) %>% 
+  conduct_intervals("Anxiety")
+
+# Use an rbind command to group the outputs together for ggpot
+
+all_intervals <- rbind(rbind(relax_intervals, neutral_intervals), anxiety_intervals) %>% 
+  
+  # Use fct_relevel to edit the ordering of the three columns
+  
+  mutate(condition = fct_relevel(condition, c("Relax", "Neutral", "Anxiety"))) 
+  
+
+# use a geom_segment function to display the confidence intervals
+
+p1 +  geom_segment(data = all_intervals,
+               
+               aes(x = condition, 
+                   xend = condition, 
+                   y = left, 
+                   yend = right),
+               size = 2,
+               colour = "#FCD29F") +
+  
+  # Use geom_point to display the means
+
+      geom_point(colour = "#FCAB64", size = 5) +
+  
+  # Add in labels for readibility
+  
+      labs(x = "Video Condition", 
+           y = "Skin Conduction Reactivity",
+           title = "Confidence Intervals of Video Condition vs. Skin Conduction Reactivity") +
+  
+  # Add in thee_bw for aesthetics
+  
+      theme_bw()
 
 ```
 
@@ -168,21 +308,23 @@ clean_data <- anxiety_data %>%
 
 ```{r figure3, echo=FALSE}
 
+# **************************************************************
+# Recreating Figure 3: 
+# **************************************************************
+
 ## Make Subsets (do this last)
 noRelaxCond <- subset(anxiety_data, anxcond3>0)
 
 #Outcome Model
 y <- lm(immigration ~ anxcond + SCDBradSelfReport1_mean+storycond, data= noRelaxCond)
-summary(y) # summarize results from model
 
 #Mediator Model
 m<- lm(SCDBradSelfReport1_mean ~ anxcond+storycond, data= noRelaxCond)
-summary(m) # summarize results from model
 
 # Mediation Analysis
 m.out<-mediate(m,y, sims=500, treat="anxcond", mediator="SCDBradSelfReport1_mean", dropobs=TRUE, boot=TRUE, conf.level=.90)
-summary(m.out)
-#plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
+
+plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
 
 ```
 
