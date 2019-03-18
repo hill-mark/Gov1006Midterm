@@ -1,9 +1,16 @@
 ---
-title: "Renshon Replication"
+title: "Replication Report on Renshon (2014)"
 author: "Sean Hughes"
-date: "March 15, 2019"
 output: html_document
 ---
+
+## Abstract
+
+I replicate and expand upon the work in “Physiological Arousal and Political Beliefs” (CITATION) using data and replication code from the Harvard Dataverse (CITATION). In this paper Renshon, Lee, and Tingley explore the effects of incidental emotions on political beliefs. Specifically, by showing that heightened physiological reactivity, measured by SCL, mediated the relationship between anxiety and anti-immigration attitude, they are able to provide evidence that emotions incidental to the decision process can have important effects on our political beliefs.
+
+I replicate 2 figures and 1 table from the article (located in the Appendix below). I also test the results of the study using alternative modeling techniques.
+
+
 
 ```{r setup, include=FALSE}
 
@@ -188,7 +195,18 @@ clean_data <- anxiety_data %>%
 
 ```
 
-## Figure 2: Skin Confuctivity Confidence Intervals
+
+```{r extension}
+
+# THE MAIN FIGURE IS:
+
+#   The mediation analysis showing the effects 
+
+```
+
+## Appendix
+
+### Figure 2: Skin Confuctivity Confidence Intervals
 
 When calculating the mean points for the different treatments I receive different results than are demonstrated in the paper. However, these results still show the same trend as shown in the paper: that the anxiety video condition effectively causes the user to experience anxiety and that the relax condition causes the amount of anxiety to be reduced. These results assume that Skin Conductivity Reactivity is a reasonable gauge of anxiety as described in the paper.
 
@@ -337,7 +355,7 @@ p1 +  geom_segment(data = all_intervals,
 ```
 
 
-## Figure 3: Causual Mediation Plot
+### Figure 3: Causual Mediation Plot
 
 I was able to succesfully recreate all of figure 3.
 
@@ -356,15 +374,19 @@ data_norelax <- clean_data %>%
   filter(Anxiety_Condition != "Relax")
 
 # Outcome Model
+
 y <- lm(Immigration_DV ~ Anxiety_IV + Conductivity_Mean + Story_Condition, data= data_norelax)
 
 # Mediator Model
+
 m<- lm(Conductivity_Mean ~ Anxiety_IV + Story_Condition, data= data_norelax)
 
 # Mediation Analysis
+
 m.out<-mediate(m,y, sims=500, treat="Anxiety_IV", mediator="Conductivity_Mean", dropobs=TRUE, boot=TRUE, conf.level=.90)
 
 # Plot the Output
+
 par(mar=c(5,6,4,1)+.1)
 plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
 mtext("Figure 3: Causal mediation plot. Treatment is anxiety video manipulation (compared to 
@@ -374,7 +396,7 @@ Horizontal lines represent 90% confidence intervals for estimates.",side=1,line=
 
 ```
 
-## Table 1: Main Results
+### Table 1: Main Results
 
 I was able to succesfully recreate all of table 1.
 
@@ -423,11 +445,6 @@ stargazer(lm1, lm2,
           title="Table 1. Main Results",
           keep.stat=c("n", "rsq")
           )
-
-
-
-
-
 ```
 
 
