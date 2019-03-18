@@ -20,6 +20,7 @@ library(tidyverse)
 library(dplyr)
 library(ggplot2)
 library(mediation)
+library(stargazer)
 
 ```
 
@@ -366,48 +367,47 @@ plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anx
 
 ## Table 1
 
-```{table1, echo=FALSE}
+```{r table1, echo=FALSE, results="asis"}
 
 # ********************************
 # Recreating Table 1: Main Results
 # ********************************
 
-#* Table 1 in paper
-#* (1)
-#reg SCDBradSelfReport1_mean anxcond if anxcond3 ~=0
+# Filter data such that anxiety condition relax is not included
 
-#* (2)
-#reg immigration storycond anxcond SCDBradSelfReport1_mean if anxcond3 ~=0
+lm1_data <- clean_data %>% 
+  
+  filter(Anxiety_Condition != "Relax") %>% 
+  
+  # Filter data so that no NA values are included
+  
+  filter(!is.na(Anxiety_Condition)) %>% 
+  
+  filter(!is.na(Anxiety_IV)) %>% 
+  
+  filter(!is.na(Immigration_DV)) %>% 
+  
+  filter(!is.na(Story_Condition))
 
 # Linear Regression 1
 
-lm(Anxiety_Condition ~ , data = clean_data)
+lm1 <- lm(Conductivity_Mean ~ Anxiety_IV, 
+   data = lm1_data)
 
 # Linear Regression 2
 
+lm2 <- lm(Immigration_DV ~ Anxiety_IV + Story_Condition + Conductivity_Mean, 
+   data = lm1_data)
 
+# Use stargazer to plot the output
 
-stargazer(ols1, ols2, ols3, ols4, 
+stargazer(lm1, lm2, 
           type="html",
-          dep.var.labels = "Overall Attitude Change",
-          covariate.labels = c("Treatment",
-                               "Waits on Platform",
-                               "White",
-                               "Income",
-                               "Franklin Line",
-                               "Grafton Sta.",
-                               "Natick Sta.",
-                               "Norfolk Sta.",
-                               "Norwood Sta.",
-                               "Southborough Sta.",
-                               "Wellesley Hills Sta.",
-                               "West Natick Sta.",
-                               "Windsor Gardens Sta.",
-                               "Intercept"),
-          star.cutoffs = c(0.05, 0.01, 0.001),
-          notes = "Natick Station omitted due to multicollinearity. All coefficients reported above are OLS coefficients. Positive numbers indicate more conservative responses.",
-          notes.align = "l"
+          notes = "Model (1) shows the effect of the treatment (anxiety) on physiological reactivity while Model (2) shows the effects of physiological reactivity on immigration preferences, controlling for the story condition. Both models includes only Neutral and Anxiety conditions (Relax condition is excluded). Standard errors in brackets.",
+          notes.align = "l",
+          title="Table 1. Main Results"
           )
+
 
 
 
