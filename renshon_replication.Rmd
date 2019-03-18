@@ -405,7 +405,8 @@ stargazer(lm1, lm2,
           type="html",
           notes = "Model (1) shows the effect of the treatment (anxiety) on physiological reactivity while Model (2) shows the effects of physiological reactivity on immigration preferences, controlling for the story condition. Both models includes only Neutral and Anxiety conditions (Relax condition is excluded). Standard errors in brackets.",
           notes.align = "l",
-          title="Table 1. Main Results"
+          title="Table 1. Main Results",
+          keep.stat=c("n", "rsq")
           )
 
 
