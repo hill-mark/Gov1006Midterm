@@ -188,7 +188,9 @@ clean_data <- anxiety_data %>%
 
 ```
 
-## Figure 2
+## Figure 2: Skin Confuctivity Confidence Intervals
+
+When calculating the mean points for the different treatments I receive different results than are demonstrated in the paper. However, these results still show the same trend as shown in the paper: that the anxiety video condition effectively causes the user to experience anxiety and that the relax condition causes the amount of anxiety to be reduced. These results assume that Skin Conductivity Reactivity is a reasonable gauge of anxiety as described in the paper.
 
 ```{r figure2, echo=FALSE}
 
@@ -335,7 +337,9 @@ p1 +  geom_segment(data = all_intervals,
 ```
 
 
-## Figure 3
+## Figure 3: Causual Mediation Plot
+
+I was able to succesfully recreate all of figure 3.
 
 ```{r figure3, echo=FALSE}
 
@@ -361,11 +365,18 @@ m<- lm(Conductivity_Mean ~ Anxiety_IV + Story_Condition, data= data_norelax)
 m.out<-mediate(m,y, sims=500, treat="Anxiety_IV", mediator="Conductivity_Mean", dropobs=TRUE, boot=TRUE, conf.level=.90)
 
 # Plot the Output
+par(mar=c(5,6,4,1)+.1)
 plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
+mtext("Figure 3: Causal mediation plot. Treatment is anxiety video manipulation (compared to 
+neutral condition), Mediator is skin conductance reactivity when answering 
+immigration questions, Outcome is composite variable of immigration preferences.
+Horizontal lines represent 90% confidence intervals for estimates.",side=1,line=5,adj=0) 
 
 ```
 
-## Table 1
+## Table 1: Main Results
+
+I was able to succesfully recreate all of table 1.
 
 ```{r table1, echo=FALSE, results="asis"}
 
@@ -404,6 +415,10 @@ lm2 <- lm(Immigration_DV ~ Anxiety_IV + Story_Condition + Conductivity_Mean,
 stargazer(lm1, lm2, 
           type="html",
           notes = "Model (1) shows the effect of the treatment (anxiety) on physiological reactivity while Model (2) shows the effects of physiological reactivity on immigration preferences, controlling for the story condition. Both models includes only Neutral and Anxiety conditions (Relax condition is excluded). Standard errors in brackets.",
+          covariate.labels = c("Anxiety Manipulation",
+                               "Story Condition",
+                               "SC Reactivity while answering questions",
+                               "Constant"),
           notes.align = "l",
           title="Table 1. Main Results",
           keep.stat=c("n", "rsq")
