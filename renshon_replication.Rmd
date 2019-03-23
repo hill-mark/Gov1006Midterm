@@ -28,6 +28,7 @@ library(dplyr)
 library(ggplot2)
 library(mediation)
 library(stargazer)
+library(rstanarm)
 
 ```
 
@@ -195,14 +196,175 @@ clean_data <- anxiety_data %>%
 
 ```
 
+## Extension Analysis
 
-```{r extension}
+I will further explore the studies findings regarding the Effects of Physiological Arousal on Immigration Preferences. Specifically, this means comparing the significance of treatment vs. the responses to the immigration questionare. We take these variables and run a series of models to verify the robustness of the results.
 
-# THE MAIN FIGURE IS:
+## Basic Linear Model
 
-#   The mediation analysis showing the effects 
+Using the main results table (Appendix Table 1) the authors claim that skin conductance reactivity is a significant predictor of immigration preference. Note that the authors of the paper choose to filter out data from the "RELAX" condition, citing that the results remain unchanged if included. We will include the RELAX condition and combine the 3 treatments into a binary variable with the following values:
+- 1 if treatment condition is Anxiety
+- 0 if treatment condition is Neutral or Relax
+The authors claim that treatment is a significant predictor of SCL. They also claim that skin conductance reactivity is a significant predictor of immigration preference. While these claims together might appear to suggest that treatment condition was a significant predictor of the immigration DV, we can see below that it is not. 
+
+
+```{r extension, echo=FALSE, results='asis'}
+
+# ******************
+# BASIC LINEAR MODEL
+# ******************
+
+# PUT THIS SOMNEWHERE:
+
+#We will be examining the results via casual inference. The variable treatment has a value of 1 if the participant was part of the treatment group (receiving the ANXIETY condition in the pretreatment video) or a value if the participant was part of the non-treatment group (receiving the RELAX or NEUTRAL conditions in the pretreatment video). We see that the potential outcomes are equal to __ and __. This means that our estimated treatment effect is __.
+
+
+# We will conduct a series of linear regressions to judge the treatment effect
+# The left hand variable will be the outcome variable (immigration questionare)
+# The right hand variable will always include treatment
+
+# Basic linear model with outcome variable and treatment
+
+# Filter data such that anxiety condition relax is not included
+
+lm1_data <- clean_data %>%
+  
+  # Filter data so that no NA values are included
+  
+  filter(!is.na(Anxiety_Condition)) %>% 
+  
+  filter(!is.na(Anxiety_IV)) %>% 
+  
+  filter(!is.na(Immigration_DV)) %>% 
+  
+  filter(!is.na(Story_Condition))
+
+# Linear Regression 1
+
+lm1 <- lm(Conductivity_Mean ~ Anxiety_IV, 
+   data = lm1_data)
+
+# Linear Regression 2
+
+lm2 <- lm(Immigration_DV ~ Anxiety_IV, 
+   data = lm1_data)
+
+# Linear Regression 2
+
+lm3 <- lm(Immigration_DV ~ Conductivity_Mean, 
+   data = lm1_data)
+
+# Use stargazer to plot the output
+
+stargazer(lm1, lm2, lm3,
+          type="html",
+          notes = "Model (1) shows the effect of the treatment (anxiety) on physiological reactivity while Model (2) shows the effects of physiological reactivity on immigration preferences, controlling for the story condition. Both models includes only Neutral and Anxiety conditions (Relax condition is excluded). Standard errors in brackets.",
+
+          notes.align = "l",
+          title="Table 1. Basic Linear Models",
+          keep.stat=c("n", "rsq")
+          )
 
 ```
+
+## Linear Model With Interaction Items
+
+#### Model 1
+
+Note that gender was not included in the dataset, though it was included in the pretreatment survey.
+```{r}
+
+# ***********************************
+# Linear Model With Interaction Items
+# ***********************************
+
+# I use indentation to help organize the different models' code
+
+# Model 1: Look at Pretreatment Demographic Variables
+
+  # Create a new dataset for model 1
+
+  lm1_data2 <- lm1_data %>% 
+
+  # Step 1: Create dummy variables
+
+    # Ideology
+  
+    # We create a dummy variable for ideology such that any ideology
+    # that is "past" moderate on their 1 - 7 scale is considered a 
+    # conservative ideology. We thus make them have a value of 1 as 
+    # being conservative, and all other ideologies (ranging from moderate
+    # to very liberal) are given a value of 0
+
+    mutate(Ideology_Dummy = case_when(
+                Ideology %in% c("Conservative", 
+                               "Slightly Conservative", 
+                               "Extremely Conservative") ~ 1,
+                TRUE ~ 0
+    ))  %>% 
+
+    # Income
+
+    # According to https://fred.stlouisfed.org/series/MEHOINUSA646N, US Median
+    #   Income was $53,657 in 2014 (The year this paper was published). We create
+    #   our dummy variable such that values of income greater than the bracket including 
+    #   this number are a 1, and income leves less than the bracket we includ here are a 0
+  
+    mutate(Income_Dummy = case_when(
+                Income %in% c("$80,000-110,000", 
+                               "$110,000 -150,000", 
+                               "$150,000-200,000",
+                               "$200,000") ~ 1,
+                TRUE ~ 0
+    ))  %>% 
+  
+    # Race
+  
+    mutate(Income_Dummy = case_when(
+                Income %in% c("$80,000-110,000", 
+                               "$110,000 -150,000", 
+                               "$150,000-200,000",
+                               "$200,000") ~ 1,
+                TRUE ~ 0
+    )) 
+
+    # Gender
+
+    # Education
+
+lm1_data
+
+# Linear Regression 1
+
+lm1 <- lm(Conductivity_Mean ~ Anxiety_IV, 
+   data = lm1_data)
+
+# Linear Regression 2
+
+lm2 <- lm(Immigration_DV ~ Anxiety_IV, 
+   data = lm1_data)
+
+# Linear Regression 2
+
+lm3 <- lm(Immigration_DV ~ Conductivity_Mean, 
+   data = lm1_data)
+
+# Use stargazer to plot the output
+
+stargazer(lm1, lm2, lm3,
+          type="html",
+          notes = "Model (1) shows the effect of the treatment (anxiety) on physiological reactivity while Model (2) shows the effects of physiological reactivity on immigration preferences, controlling for the story condition. Both models includes only Neutral and Anxiety conditions (Relax condition is excluded). Standard errors in brackets.",
+
+          notes.align = "l",
+          title="Table 1. Basic Linear Models",
+          keep.stat=c("n", "rsq")
+          )
+
+
+
+
+```
+
 
 ## Appendix
 
