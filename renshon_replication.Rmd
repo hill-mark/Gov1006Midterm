@@ -29,6 +29,7 @@ library(ggplot2)
 library(mediation)
 library(stargazer)
 library(rstanarm)
+library(rstan)
 
 ```
 
@@ -254,33 +255,10 @@ lm2 <- lm(Immigration_DV ~ Anxiety_IV,
 lm3 <- lm(Immigration_DV ~ Conductivity_Mean, 
    data = lm1_data)
 
-# Use stargazer to plot the output
-
-stargazer(lm1, lm2, lm3,
-          type="html",
-          notes = "Model (1) shows the effect of the treatment (anxiety) on physiological reactivity while Model (2) shows the effects of physiological reactivity on immigration preferences, controlling for the story condition. Both models includes only Neutral and Anxiety conditions (Relax condition is excluded). Standard errors in brackets.",
-
-          notes.align = "l",
-          title="Table 1. Basic Linear Models",
-          keep.stat=c("n", "rsq")
-          )
-
-```
-
-## Linear Model With Interaction Items
-
-#### Model 1
-
-Note that gender was not included in the dataset, though it was included in the pretreatment survey.
-```{r}
-
-# ***********************************
-# Linear Model With Interaction Items
-# ***********************************
 
 # I use indentation to help organize the different models' code
 
-# Model 1: Look at Pretreatment Demographic Variables
+# Model 4: Look at Pretreatment Demographic Variables vs. Treatment
 
   # Create a new dataset for model 1
 
@@ -320,38 +298,35 @@ Note that gender was not included in the dataset, though it was included in the 
   
     # Race
   
-    mutate(Income_Dummy = case_when(
-                Income %in% c("$80,000-110,000", 
-                               "$110,000 -150,000", 
-                               "$150,000-200,000",
-                               "$200,000") ~ 1,
+    # Will be set to value 1 when the race is caucasian, and
+    #   a value of 0 otherwise
+  
+    mutate(Race_Dummy = case_when(
+                Race == "Caucasian" ~ 1,
                 TRUE ~ 0
-    )) 
+    ))
 
-    # Gender
+    # Gender seems not to have been included in the dataset
 
-    # Education
+    # Education seems to have been left out of the pretreatment
+    #   survey that I was sent by the authors
 
-lm1_data
+  # Linear Regression 1
+  # We will add in the demographic factors using the dummy variables
+  #   that we created above
+  
+  lm4 <- lm(Conductivity_Mean ~ Anxiety_IV + Ideology_Dummy + Income_Dummy + Race_Dummy, 
+     data = lm1_data2)
+  
+# Model 5: Look at Pretreatment Demographic variables vs. Immigration DV
 
-# Linear Regression 1
-
-lm1 <- lm(Conductivity_Mean ~ Anxiety_IV, 
-   data = lm1_data)
-
-# Linear Regression 2
-
-lm2 <- lm(Immigration_DV ~ Anxiety_IV, 
-   data = lm1_data)
-
-# Linear Regression 2
-
-lm3 <- lm(Immigration_DV ~ Conductivity_Mean, 
-   data = lm1_data)
-
+  lm5 <- lm(Immigration_DV ~ Conductivity_Mean + Ideology_Dummy + Income_Dummy + Race_Dummy, 
+     data = lm1_data2)
+  
+  
 # Use stargazer to plot the output
 
-stargazer(lm1, lm2, lm3,
+stargazer(lm1,lm2, lm3, lm4, lm5,
           type="html",
           notes = "Model (1) shows the effect of the treatment (anxiety) on physiological reactivity while Model (2) shows the effects of physiological reactivity on immigration preferences, controlling for the story condition. Both models includes only Neutral and Anxiety conditions (Relax condition is excluded). Standard errors in brackets.",
 
@@ -365,6 +340,27 @@ stargazer(lm1, lm2, lm3,
 
 ```
 
+## Bayesian Model
+
+We fit the data with a bayesian linear model using the SCL conductivity measurements as the only predictor. We see the posterior distribution which refers to the probability distribution of an unknown quantity when treated as a random variable.
+
+```{r bay, include=FALSE}
+
+# Run a Bayesian Linear Model on the data to determine the relationship 
+#   between SCL and the dependant variable immigration DV
+
+hiding.stuff <- capture.output(stan1 <- stan_glm(Immigration_DV ~ Conductivity_Mean, 
+                                                 data = clean_data))
+
+# Extract the resulting data and plot it via a histogram
+
+#stan_hist((stan.mod1$stan_summary[c(2),c(4:10)]) , fill = "dodgerblue")
+
+```
+```{r displaystan, echo=FALSE}
+stan_hist(stan1,
+          binwidth = .01)
+```
 
 ## Appendix
 
