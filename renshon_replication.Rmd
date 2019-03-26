@@ -199,15 +199,39 @@ clean_data <- anxiety_data %>%
 
 ## Extension Analysis
 
+#### Goals
+
 I will further explore the studies findings regarding the Effects of Physiological Arousal on Immigration Preferences. Specifically, this means comparing the significance of treatment vs. the responses to the immigration questionare. We take these variables and run a series of models to verify the robustness of the results.
 
-## Basic Linear Model
+#### Conclusion
+
+The authors are correct in stating that there is a significant causal link between treatment (Given as a pretreatment video) and SCL (Appendix figure 1). They are also correct in stating that there is a significant link between SCL and immigrtion preferences (Extension 1). Despite these two claims, they fail to demonstrate the effects of anxiety on political beliefs. 
+
+## Extension 1: Basic Linear Model
 
 Using the main results table (Appendix Table 1) the authors claim that skin conductance reactivity is a significant predictor of immigration preference. Note that the authors of the paper choose to filter out data from the "RELAX" condition, citing that the results remain unchanged if included. We will include the RELAX condition and combine the 3 treatments into a binary variable with the following values:
 - 1 if treatment condition is Anxiety
 - 0 if treatment condition is Neutral or Relax
-The authors claim that treatment is a significant predictor of SCL. They also claim that skin conductance reactivity is a significant predictor of immigration preference. While these claims together might appear to suggest that treatment condition was a significant predictor of the immigration DV, we can see below that it is not. 
 
+#### Model 1
+
+A linear model of the video treatment condition (Relax, Neutral, or Anxiety) versus Skin Conductance readings.
+
+#### Model 2
+
+A linear model of the video treatment condition versus postreatment Immigration questionare responses.
+
+#### Model 3
+
+A linear model of Skin Conductance versus postreatment Immigration questionare responses.
+
+#### Model 4
+
+A linear model of the video treatment condition versus Skin Conductance readings and a variety of covariates from the pretreatment survey. The "Conservative" dummy variable was created by selecting all answers to the Ideology section of the pretreatment questionare that leaned conservative (responses were ranked on a 1 - 7 scale with 1 being very liberal and 7 being very conservative). The "High Income" dummy variable was created by selecting all users who had an income of $80k annualy or greater. The "White" dummy variable was created by selecting all users who responded to the Race section of the pretreatment questionare and indicated that they identified as white.
+
+#### Model 5
+
+A linear model of the Skin Conductance versus postreatment Immigration questionare responses including a variety of covariates from the pretreatment survey.
 
 ```{r extension, echo=FALSE, results='asis'}
 
@@ -340,7 +364,7 @@ stargazer(lm1,lm2, lm3, lm4, lm5,
 
 ```
 
-## Bayesian Model
+## Figure 2 Bayesian Model
 
 We fit the data with a bayesian linear model using the SCL conductivity measurements as the only predictor. We see the posterior distribution which refers to the probability distribution of an unknown quantity when treated as a random variable.
 
@@ -358,8 +382,19 @@ hiding.stuff <- capture.output(stan1 <- stan_glm(Immigration_DV ~ Conductivity_M
 
 ```
 ```{r displaystan, echo=FALSE}
+
+# A Histogram view of the posterior distributions for conductivity and intercept
+
 stan_hist(stan1,
-          binwidth = .01)
+          binwidth = .01) + labs(title = "Posterior Distributions of Intercept and SCL Conductivity")
+```
+
+```{r bayes2, echo=FALSE}
+
+hiding.stuff <- capture.output(stan1 <- stan_glm(Immigration_DV ~ Conductivity_Mean, 
+                                                 data = clean_data))
+
+
 ```
 
 ## Appendix
