@@ -385,8 +385,12 @@ We fit the data with a bayesian linear model using the SCL conductivity measurem
 # Run a Bayesian Linear Model on the data to determine the relationship 
 #   between SCL and the dependant variable immigration DV
 
-hiding.stuff <- capture.output(stan1 <- stan_glm(Immigration_DV ~ Conductivity_Mean, 
-                                                 data = clean_data))
+# Making a new row as a cheap way to change the name in the histogram
+
+graph_data <- clean_data %>% mutate(`SCL Conductivity` = Conductivity_Mean)
+
+hiding.stuff <- capture.output(stan1 <- stan_glm(Immigration_DV ~ `SCL Conductivity`, 
+                                                 data = graph_data))
 
 # Extract the resulting data and plot it via a histogram
 
@@ -398,7 +402,12 @@ hiding.stuff <- capture.output(stan1 <- stan_glm(Immigration_DV ~ Conductivity_M
 # A Histogram view of the posterior distributions for conductivity and intercept
 
 stan_hist(stan1,
-          binwidth = .01) + labs(title = "Posterior Distributions of Intercept and SCL Conductivity")
+          binwidth = .01) + 
+  labs(title = "Posterior Distributions of Intercept and SCL Conductivity", 
+       x = "Immigration Questionare Responses (Scale from 1 to 5)")
+
+# I am struggling to individually rename each of these histograms ^
+
 ```
 
 ```{r bayes2, echo=FALSE}
