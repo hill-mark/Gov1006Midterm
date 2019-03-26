@@ -32,6 +32,8 @@ library(mediation)
 library(stargazer)
 library(rstanarm)
 library(rstan)
+library(data.table)
+require(gridExtra)
 
 ```
 
@@ -648,6 +650,114 @@ stargazer(lm1, lm2,
           title="Table 1. Main Results",
           keep.stat=c("n", "rsq")
           )
+
+
 ```
 
+### Table 1: Graphical Representation
 
+```{r table1lol, include=FALSE}
+
+#******************************************************
+# Create a unique lolipop chart of table 1 using ggplot
+#******************************************************
+
+# Extract values for model 1 data
+# Extract value of treatment correlation and p value
+
+model1temp <- as.data.frame(summary(lm1)$coefficients)
+
+# Make the row names into a column for the data frame
+
+setDT(model1temp, keep.rownames = TRUE)[]
+
+model1 <- model1temp %>% 
+  
+  # Filter out the columns that we don't need
+  
+  dplyr::select(rn, Estimate, `Pr(>|t|)`) %>% 
+  
+  # round to 2 decimal places
+  
+  mutate_if(is.numeric, ~round(., 2)) %>% 
+  
+  rename(`p value` = `Pr(>|t|)`)  %>% 
+  
+  mutate(rn = case_when(
+    rn == "Story_ConditionNiko" ~ "Niko Story Condition",
+    rn == "Conductivity_Mean" ~ "Physiological Reactivity",
+    TRUE ~ "Treatment Condition"
+  ))
+
+
+# Extract values for model 2 data
+# Extract values of correlations and p values
+
+model2temp <- as.data.frame(summary(lm2)$coefficients) 
+
+
+setDT(model2temp, keep.rownames = TRUE)[]
+
+model2 <- model2temp %>% 
+  
+  # Filter out the columns that we don't need
+  
+  dplyr::select(rn, Estimate, `Pr(>|t|)`) %>% 
+  
+  # round to 2 decimal places
+  
+  mutate_if(is.numeric, ~round(., 2)) %>% 
+  
+  rename(`p value` = `Pr(>|t|)`) %>% 
+  
+  mutate(rn = case_when(
+    rn == "Story_ConditionNiko" ~ "Niko Story Condition",
+    rn == "Conductivity_Mean" ~ "Physiological Reactivity",
+    TRUE ~ "Treatment Condition"
+  ))
+
+# Extract intercepts
+# I decided to extract these because it makes the charts way
+# more legible. I can also just add this in to the text at the
+# top of the chart
+
+intercept1 <- model1$Estimate[1]
+intercept1 <- model1$Estimate[1]
+intercept2 <- model2$Estimate[1]
+
+# Remove intercept row
+
+model1 = model1[-1,]
+model2 = model2[-1,]
+
+```
+
+```{r lolipopout, echo=FALSE}
+
+ggplot(model1, aes(x=rn, y=Estimate, label=Estimate)) + 
+  geom_point(stat='identity', fill="black", size=10, aes(color = `p value`))  +
+  geom_segment(aes(y = 0, 
+                   x = rn, 
+                   yend = Estimate, 
+                   xend = rn), 
+               color = "black") +
+  geom_text(color="white", size=3) +
+  labs(title="Model 1", 
+       subtitle=paste("Effect of the treatment (anxiety) on physiological reactivity. Intercept is", intercept1),
+       x = "Variable") + 
+  coord_flip()
+
+ggplot(model2, aes(x=rn, y=Estimate, label=Estimate)) + 
+  geom_point(stat='identity', fill="black", size=10, aes(color = `p value`))  +
+  geom_segment(aes(y = 0, 
+                   x = rn, 
+                   yend = Estimate, 
+                   xend = rn), 
+               color = "black") +
+  geom_text(color="white", size=3) +
+  labs(title="Model 2", 
+       subtitle=paste("Effects of physiological reactivity on immigration preferences,\ncontrolling for the story condition. Intercept is", intercept2),
+       x = "Variable") + 
+  coord_flip()
+
+```
