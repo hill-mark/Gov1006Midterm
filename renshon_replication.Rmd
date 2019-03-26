@@ -10,7 +10,7 @@ bibliography: bibliography.bib
 
 I replicate and expand upon the work in “Physiological Arousal and Political Beliefs” (@Renshon2014) using data and replication code from the Harvard Dataverse (@dataverseData). In this paper Renshon, Lee, and Tingley explore the effects of incidental emotions on political beliefs. Specifically, by showing that heightened physiological reactivity, measured by SCL, mediated the relationship between anxiety and anti-immigration attitude, they are able to provide evidence that emotions incidental to the decision process can have important effects on our political beliefs.
 
-I replicate 2 figures and 1 table from the article (located in the Appendix below). I also test the robustness of their results of the study using alternative modeling techniques.
+I replicate and offer improved versions of 2 figures and 1 table from the article (located in the Appendix below). I also test the robustness of the results of the study using alternative modeling techniques.
 
 
 
@@ -213,7 +213,7 @@ Even when accounting for pretreatment covariates, my linear model shows the same
 
 ### Discussions
 
-The following three correlations or lack therof create an interesting situation: the link between treatment condition and SCL, the link between SCL and immigration questionare results, and the lack of a link between treatment and immigration questionare results. This link where X correlates with Y and Y with Z but X does not correlate with Z suggets that there may be other factors at play. The author suggests that " we cannot say for sure whether other discrete emotions (such as disgust or excitement) or even physical activity (such as running) which generate physiological arousal might not have similar effects(CITATION)". This means that the author is saying that while they can, and do, effectively stimulate SCL using the video pretreatment, that there could be other factors that they do not understand that impact the levels. This conclusion means that one cannot say that a link has been drawn between incidental emotions and political opinions, only that skin conductivity increases when one selects more conservative viewpoints on immigration in this study.
+The following three correlations or lack therof create an interesting situation: the link between treatment condition and SCL, the link between SCL and immigration questionare results, and the lack of a link between treatment and immigration questionare results. This link where X correlates with Y and Y with Z but X does not correlate with Z suggets that there may be other factors at play. The author suggests that " we cannot say for sure whether other discrete emotions (such as disgust or excitement) or even physical activity (such as running) which generate physiological arousal might not have similar effects(@Renshon2014)". This means that the author is saying that while they can, and do, effectively stimulate SCL using the video pretreatment, that there could be other factors that they do not understand that impact the levels. This conclusion means that one cannot say that a link has been drawn between incidental emotions and political opinions, only that skin conductivity increases when one selects more conservative viewpoints on immigration in this study.
 
 ## Extension 1: Basic Linear Model
 
@@ -534,7 +534,9 @@ all_intervals <- rbind(rbind(relax_intervals, neutral_intervals), anxiety_interv
 
 # use a geom_segment function to display the confidence intervals
 
-p1 +  geom_segment(data = all_intervals,
+# THIS IS A RECREATION GRAPH. A BETTER VERSION IS INCLUDED BELOW
+
+recreation1 <- p1 +  geom_segment(data = all_intervals,
                
                aes(x = condition, 
                    xend = condition, 
@@ -559,6 +561,39 @@ p1 +  geom_segment(data = all_intervals,
 
 ```
 
+```{r figuregraphical, echo=FALSE, warning=FALSE}
+
+# Relevel the data for the treatment condition for presentation
+
+f1_data <- clean_data %>% 
+
+  mutate(Anxiety_Condition = 
+           fct_relevel(Anxiety_Condition, c("Relax", 
+                                            "Neutral", 
+                                            "Anxiety"))) 
+
+
+# Code referred to from 
+# http://r-statistics.co/Top50-Ggplot2-Visualizations-MasterList-R-Code.html
+
+g <- ggplot(f1_data, aes(Anxiety_Condition, Conductivity_Mean))
+
+g + geom_boxplot() + 
+  
+  # Use a geom dotplot to add dots for each datapoint
+  
+  geom_dotplot(binaxis='y', 
+               stackdir='center', 
+               dotsize = .5, 
+               fill="red",
+               binwidth = .1) +
+  
+        labs(x = "Video Condition", 
+           y = "Skin Conduction Reactivity",
+           title = "Confidence Intervals of Video Condition vs. Skin Conduction Reactivity",
+       caption="Dots represent all data points. Line represents mean value. Box represents 95% confidence interval.")
+
+```
 
 ```{r figure3, echo=FALSE}
 
@@ -750,7 +785,7 @@ ggplot(model2, aes(x=rn, y=Estimate, label=Estimate)) +
 
 ### Figure 3: Causual Mediation Plot
 
-I was able to succesfully recreate all of figure 3.
+I was able to succesfully recreate all of figure 3 from replication data.
 ```{r table2out, echo=FALSE}
 
 par(mar=c(5,6,4,1)+.1)
