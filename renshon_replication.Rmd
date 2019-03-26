@@ -2,13 +2,15 @@
 title: "Replication Report on Renshon (2014)"
 author: "Sean Hughes"
 output: html_document
+citation_package: natbib
+bibliography: bibliography.bib
 ---
 
 ## Abstract
 
-I replicate and expand upon the work in “Physiological Arousal and Political Beliefs” (CITATION) using data and replication code from the Harvard Dataverse (CITATION). In this paper Renshon, Lee, and Tingley explore the effects of incidental emotions on political beliefs. Specifically, by showing that heightened physiological reactivity, measured by SCL, mediated the relationship between anxiety and anti-immigration attitude, they are able to provide evidence that emotions incidental to the decision process can have important effects on our political beliefs.
+I replicate and expand upon the work in “Physiological Arousal and Political Beliefs” (@Renshon2014) using data and replication code from the Harvard Dataverse (@dataverseData). In this paper Renshon, Lee, and Tingley explore the effects of incidental emotions on political beliefs. Specifically, by showing that heightened physiological reactivity, measured by SCL, mediated the relationship between anxiety and anti-immigration attitude, they are able to provide evidence that emotions incidental to the decision process can have important effects on our political beliefs.
 
-I replicate 2 figures and 1 table from the article (located in the Appendix below). I also test the results of the study using alternative modeling techniques.
+I replicate 2 figures and 1 table from the article (located in the Appendix below). I also test the robustness of their results of the study using alternative modeling techniques.
 
 
 
@@ -199,19 +201,23 @@ clean_data <- anxiety_data %>%
 
 ## Extension Analysis
 
-#### Goals
+#### Overview
 
-I will further explore the studies findings regarding the Effects of Physiological Arousal on Immigration Preferences. Specifically, this means comparing the significance of treatment vs. the responses to the immigration questionare. We take these variables and run a series of models to verify the robustness of the results.
+I examine the role of pretreatment features in the trial using linear modeling and newly creted dummy variables. I then use bayesian linear modeling tequniques to test the link between skin conductivity and responses to immigration questions.
 
-#### Conclusion
+#### Conclusions
 
-The authors are correct in stating that there is a significant causal link between treatment (Given as a pretreatment video) and SCL (Appendix figure 1). They are also correct in stating that there is a significant link between SCL and immigrtion preferences (Extension 1). Despite these two claims, they fail to demonstrate the effects of anxiety on political beliefs. 
+Even when accounting for pretreatment covariates, my linear model shows the same significant causal link between treatment (Given as a pretreatment video) and SCL (Appendix figure 1) that the authors found. The posterior distribution of my bayesian linear model results in a similiar number for the link between SCL and immigrtion preferences (Extension 2). 
+
+### Discussions
+
+The following three correlations or lack therof create an interesting situation: the link between treatment condition and SCL, the link between SCL and immigration questionare results, and the lack of a link between treatment and immigration questionare results. This link where X correlates with Y and Y with Z but X does not correlate with Z suggets that there may be other factors at play. The author suggests that " we cannot say for sure whether other discrete emotions (such as disgust or excitement) or even physical activity (such as running) which generate physiological arousal might not have similar effects(CITATION)". This means that the author is saying that while they can, and do, effectively stimulate SCL using the video pretreatment, that there could be other factors that they do not understand that impact the levels. This conclusion means that one cannot say that a link has been drawn between incidental emotions and political opinions, only that skin conductivity increases when one selects more conservative viewpoints on immigration in this study.
 
 ## Extension 1: Basic Linear Model
 
 Using the main results table (Appendix Table 1) the authors claim that skin conductance reactivity is a significant predictor of immigration preference. Note that the authors of the paper choose to filter out data from the "RELAX" condition, citing that the results remain unchanged if included. We will include the RELAX condition and combine the 3 treatments into a binary variable with the following values:
-- 1 if treatment condition is Anxiety
-- 0 if treatment condition is Neutral or Relax
+1 if treatment condition is Anxiety
+0 if treatment condition is Neutral or Relax
 
 #### Model 1
 
@@ -364,7 +370,7 @@ stargazer(lm1,lm2, lm3, lm4, lm5,
 
 ```
 
-## Figure 2 Bayesian Model
+## Extension 2: Bayesian Model
 
 We fit the data with a bayesian linear model using the SCL conductivity measurements as the only predictor. We see the posterior distribution which refers to the probability distribution of an unknown quantity when treated as a random variable.
 
