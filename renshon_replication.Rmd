@@ -411,7 +411,7 @@ hiding.stuff <- capture.output(stan1 <- stan_glm(Immigration_DV ~ Conductivity_M
 
 ## Appendix
 
-### Figure 2: Skin Confuctivity Confidence Intervals
+### Figure 2: Skin Conductivity Confidence Intervals
 
 When calculating the mean points for the different treatments I receive different results than are demonstrated in the paper. However, these results still show the same trend as shown in the paper: that the anxiety video condition effectively causes the user to experience anxiety and that the relax condition causes the amount of anxiety to be reduced. These results assume that Skin Conductivity Reactivity is a reasonable gauge of anxiety as described in the paper.
 
@@ -560,10 +560,6 @@ p1 +  geom_segment(data = all_intervals,
 ```
 
 
-### Figure 3: Causual Mediation Plot
-
-I was able to succesfully recreate all of figure 3.
-
 ```{r figure3, echo=FALSE}
 
 # **************************************************************
@@ -589,16 +585,6 @@ m<- lm(Conductivity_Mean ~ Anxiety_IV + Story_Condition, data= data_norelax)
 # Mediation Analysis
 
 m.out<-mediate(m,y, sims=500, treat="Anxiety_IV", mediator="Conductivity_Mean", dropobs=TRUE, boot=TRUE, conf.level=.90)
-
-# Plot the Output
-
-par(mar=c(5,6,4,1)+.1)
-plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
-mtext("Figure 3: Causal mediation plot. Treatment is anxiety video manipulation (compared to 
-neutral condition), Mediator is skin conductance reactivity when answering 
-immigration questions, Outcome is composite variable of immigration preferences.
-Horizontal lines represent 90% confidence intervals for estimates.",side=1,line=5,adj=0) 
-
 ```
 
 ### Table 1: Main Results
@@ -759,5 +745,20 @@ ggplot(model2, aes(x=rn, y=Estimate, label=Estimate)) +
        subtitle=paste("Effects of physiological reactivity on immigration preferences,\ncontrolling for the story condition. Intercept is", intercept2),
        x = "Variable") + 
   coord_flip()
+
+```
+
+### Figure 3: Causual Mediation Plot
+
+I was able to succesfully recreate all of figure 3.
+```{r table2out, echo=FALSE}
+
+par(mar=c(5,6,4,1)+.1)
+plot(m.out, labels=c("ACME\n(Physiological \nReactivity)", "Direct Effect \n(Anxiety)", "Total Effect"))
+mtext("Figure 3: Causal mediation plot. Treatment is anxiety video manipulation (compared to 
+neutral condition), Mediator is skin conductance reactivity when answering 
+immigration questions, Outcome is composite variable of immigration preferences.
+Horizontal lines represent 90% confidence intervals for estimates.",side=1,line=5,adj=0) 
+
 
 ```
