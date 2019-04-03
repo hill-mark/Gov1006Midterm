@@ -12,7 +12,7 @@ I replicate and expand upon the work in “Physiological Arousal and Political B
 
 I replicate and offer improved versions of 2 figures and 1 table from the article (located in the Appendix below). I also test the robustness of the results of the study using alternative modeling techniques.
 
-
+Good, through abstract.
 
 ```{r setup, include=FALSE}
 
@@ -59,6 +59,8 @@ mturk_data <-read.csv("./dataverse_files/mTurk.csv")
 
 # Start by renaming the variables. This is following the names that
 #   they used in the stata file with some minor changes
+
+Great idea and well executed. Useful when you come back to this or someone tries to replicate
 
 clean_data <- anxiety_data %>%  
   rename("Anxiety_Condition" = anxcond3,
@@ -201,6 +203,9 @@ clean_data <- anxiety_data %>%
 
 ```
 
+The work and comments above are excellent! You and anyone attempting a replication will know exactly what the variables are
+and the values they contain.
+
 ## Extension Analysis
 
 #### Overview
@@ -209,17 +214,23 @@ I examine the role of pretreatment features in the trial using linear modeling a
 
 #### Conclusions
 
-Even when accounting for pretreatment covariates, my linear model shows the same significant causal link between treatment (Given as a pretreatment video) and SCL (Appendix figure 1) that the authors found. The posterior distribution of my bayesian linear model results in a similiar number for the link between SCL and immigrtion preferences (Extension 2). 
+Even when accounting for pretreatment covariates, my linear model shows the same significant causal link between treatment (Given as a pretreatment video) and SCL (Appendix figure 1) that the authors found. The posterior distribution of my bayesian linear model results in a similiar number for the link between SCL and immigrtion preferences (Extension 2).
 
 ### Discussions
 
 The following three correlations or lack therof create an interesting situation: the link between treatment condition and SCL, the link between SCL and immigration questionare results, and the lack of a link between treatment and immigration questionare results. This link where X correlates with Y and Y with Z but X does not correlate with Z suggets that there may be other factors at play. The author suggests that " we cannot say for sure whether other discrete emotions (such as disgust or excitement) or even physical activity (such as running) which generate physiological arousal might not have similar effects(@Renshon2014)". This means that the author is saying that while they can, and do, effectively stimulate SCL using the video pretreatment, that there could be other factors that they do not understand that impact the levels. This conclusion means that one cannot say that a link has been drawn between incidental emotions and political opinions, only that skin conductivity increases when one selects more conservative viewpoints on immigration in this study.
+
+This is a great lead into your extension. The readers will know exactly what your doing and how you do it.
+
+Brief aside: Mediation analysis is attempting to see how much the effect of treatment (anxiety) is operating through the mediator (skin conductivity). So there is a direct effect (Anxiety -> Immigration Atts), but there is also an indirect effect (Anx -> Skin Cond. -> Immigration Atts). Mediation analysis tells if and how much of the effect of anxiety is operating through skin conductivity. So they show there is no direct effect of anxiety (it's not significant), which means that the skin conductivity from anxiety is actually what is resulting in changes, not just anxiety. It's generally accepted that emotion has an effect on political attitudes, but these authors want to show that it's not just changes in emotion, it's actually changes in emotion that result in a physiological response, and that it's this physical response that is causing attitude change.
 
 ## Extension 1: Basic Linear Model
 
 Using the main results table (Appendix Table 1) the authors claim that skin conductance reactivity is a significant predictor of immigration preference. Note that the authors of the paper choose to filter out data from the "RELAX" condition, citing that the results remain unchanged if included. We will include the RELAX condition and combine the 3 treatments into a binary variable with the following values:
 1 if treatment condition is Anxiety
 0 if treatment condition is Neutral or Relax
+
+Why did you decide to keep all the data? Something you'll want to justify to readers.
 
 #### Model 1
 
@@ -376,6 +387,10 @@ stargazer(lm1,lm2, lm3, lm4, lm5,
 
 ```
 
+Nicely done table, great footnotes, cool extension. Also, really great initiative to reach out to the authors to get 
+info on variables you want to use. One additional thing that would have been nice is a brief discussion of your table.
+Was it what you were expecting? How does it build on what was done? Good things to keep in mind for final project.
+
 ## Extension 2: Bayesian Model
 
 We fit the data with a bayesian linear model using the SCL conductivity measurements as the only predictor. We see the posterior distribution which refers to the probability distribution of an unknown quantity when treated as a random variable.
@@ -418,11 +433,17 @@ hiding.stuff <- capture.output(stan1 <- stan_glm(Immigration_DV ~ Conductivity_M
 
 ```
 
+Nice use of bayesian regression and plots. A bit more of an explanation would be good.
+
 ## Appendix
 
 ### Figure 2: Skin Conductivity Confidence Intervals
 
 When calculating the mean points for the different treatments I receive different results than are demonstrated in the paper. However, these results still show the same trend as shown in the paper: that the anxiety video condition effectively causes the user to experience anxiety and that the relax condition causes the amount of anxiety to be reduced. These results assume that Skin Conductivity Reactivity is a reasonable gauge of anxiety as described in the paper.
+
+The variable you wanted to use here was SCDBradVidManipAll_mean, not SCDBradSelfReport1_mean. This is why your estimates 
+were off. Cool boxplot though. This is something you would want to justify. Why did you choose to go with a boxplot 
+instead of what the authors initially did? What are the advantages and disadvantages? How does it show data differently?
 
 ```{r figure2, echo=FALSE}
 
@@ -683,6 +704,7 @@ stargazer(lm1, lm2,
 
 
 ```
+Great replication of Table 1.
 
 ### Table 1: Graphical Representation
 
@@ -791,6 +813,7 @@ ggplot(model2, aes(x=rn, y=Estimate, label=Estimate)) +
   coord_flip()
 
 ```
+In general, I find this figures really confusing and hard to read. No impact on your grade, just something I thought worth sharing.
 
 ### Figure 3: Causual Mediation Plot
 
@@ -806,3 +829,4 @@ Horizontal lines represent 90% confidence intervals for estimates.",side=1,line=
 
 
 ```
+Exactly what we wanted for figure 3! Great job!
